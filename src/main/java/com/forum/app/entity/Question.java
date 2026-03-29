@@ -1,5 +1,6 @@
 package com.forum.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,8 +34,9 @@ public class Question {
     @JoinTable(name ="question_tags" ,joinColumns = @JoinColumn(name ="question_id") , inverseJoinColumns = @JoinColumn(name ="tag_id"))
     private List<Tag> tags;
 
-   // @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-   // private List<Answer> answers;
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"quesrion"})
+    private List<Answer> answers;
 
     public Question() {
     }
@@ -111,5 +113,13 @@ public class Question {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
+    }
+
+    public List<Answer> getAnswers(){
+        return answers;
+    }
+
+    public void setAnswers(List<Answer> answers){
+        this.answers = answers;
     }
 }

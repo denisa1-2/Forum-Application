@@ -32,7 +32,7 @@ public class QuestionService {
         List<Tag> finalTags= tagService.resolveTags(question.getTags());
 
         question.setId(null);
-        question.setStatus("CREATED");
+        question.setStatus("RECEIVED");
         question.setCreationDateTime(LocalDateTime.now());
         question.setAuthor(author);
         question.setTags(finalTags);
