@@ -35,7 +35,7 @@ public class Question {
     private List<Tag> tags;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties({"quesrion"})
+    @JsonIgnoreProperties({"question"})
     private List<Answer> answers;
 
     public Question() {
