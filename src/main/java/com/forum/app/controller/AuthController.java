@@ -2,6 +2,7 @@ package com.forum.app.controller;
 
 import com.forum.app.entity.User;
 import com.forum.app.service.AuthService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestParam String username, @RequestParam String password) {
-        return ResponseEntity.ok(authService.login(username, password));
+    public ResponseEntity<User> login(@RequestParam String email, @RequestParam String password, HttpSession session) {
+        User user = authService.login(email, password);
+        session.setAttribute("loggedUserId", user.getId());
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Logout successful");
     }
 }

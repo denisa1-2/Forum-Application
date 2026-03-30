@@ -31,8 +31,8 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public User login(String username, String password) {
-        User user = userRepository.findByUsername(username)
+    public User login(String email, String password) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
         if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid credentials");

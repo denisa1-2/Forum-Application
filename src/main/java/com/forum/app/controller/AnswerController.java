@@ -2,6 +2,7 @@ package com.forum.app.controller;
 
 import com.forum.app.entity.Answer;
 import com.forum.app.service.AnswerService;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,20 @@ public class AnswerController {
 
     private final AnswerService answerService;
 
-    @PostMapping("/user/{userId}/question/{questionId}")
-    public Answer createAnswer(@PathVariable Long userId,
-                               @PathVariable Long questionId,
-                               @RequestBody Answer answer){
+    private Long getLoggedUserId(HttpSession session) {
+        Object userId = session.getAttribute("loggedUserId");
+
+        if (userId == null) {
+            throw  new RuntimeException("No user is logged in");
+        }
+        return (Long) userId;
+    }
+
+    @PostMapping("/question/{questionId}")
+    public Answer createAnswer(@PathVariable Long questionId,
+                               @RequestBody Answer answer,
+                               HttpSession session) {
+        Long userId = getLoggedUserId(session);
         return answerService.createAnswer(userId,questionId,answer);
     }
 
@@ -27,16 +38,18 @@ public class AnswerController {
         return answerService.getAnswersByQuestion(questionId);
     }
 
-    @PutMapping("/user/{userId}/{answerId}")
-    public Answer updateAnswer(@PathVariable Long userId,
-                               @PathVariable Long answerId,
-                               @RequestBody Answer answer){
+    @PutMapping("/{answerId}")
+    public Answer updateAnswer(@PathVariable Long answerId,
+                               @RequestBody Answer answer,
+                               HttpSession session) {
+        Long userId = getLoggedUserId(session);
         return answerService.updateAnswer(userId,answerId,answer);
     }
 
-    @DeleteMapping("/user/{userId}/{answerId}")
-    public void deleteAnswer(@PathVariable Long userId,
-                             @PathVariable Long answerId){
+    @DeleteMapping("/{answerId}")
+    public void deleteAnswer(@PathVariable Long answerId,
+                             HttpSession session) {
+        Long userId = getLoggedUserId(session);
         answerService.deleteAnswer(userId,answerId);
     }
 

@@ -2,6 +2,7 @@ package com.forum.app.controller;
 
 import com.forum.app.entity.User;
 import com.forum.app.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,26 +16,45 @@ public class UserController {
         this.userService = userService;
     }
 
+    private Long getLoggedUserId(HttpSession session) {
+        Object userId = session.getAttribute("loggedUserId");
+
+        if (userId == null) {
+            throw new RuntimeException("No user is logged in");
+        }
+
+        return (Long) userId;
+    }
+
     @GetMapping
     public Iterable<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userService.getUserById(id);
+    @GetMapping("/me")
+    public User getCurrentUser(HttpSession session) {
+        Long userId = getLoggedUserId(session);
+        return userService.getUserById(userId);
     }
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id,
-                           @RequestParam String username,
-                           @RequestParam String email) {
-        return userService.updateUser(id, username, email);
+    @PutMapping("/me")
+    public User updateCurrentUser(@RequestParam String username, @RequestParam String email,  HttpSession session) {
+        Long userId = getLoggedUserId(session);
+        return userService.updateUser(userId, username, email);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.ok("User has been deleted");
+    @DeleteMapping("/me")
+    public ResponseEntity<String> deleteCurrentUser(HttpSession session) {
+        Long userId = getLoggedUserId(session);
+        userService.deleteUser(userId);
+        session.invalidate();
+        return ResponseEntity.ok("Current user has been deleted");
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<String> changePassword(@RequestParam String oldPassword, @RequestParam String newPassword, HttpSession session) {
+        Long userId = getLoggedUserId(session);
+        userService.changePassword(userId, oldPassword, newPassword);
+        return ResponseEntity.ok("Password has been changed successfully");
     }
 }
