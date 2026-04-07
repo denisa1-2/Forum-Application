@@ -4,7 +4,6 @@ import com.forum.app.entity.Answer;
 import com.forum.app.service.AnswerService;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -27,7 +27,6 @@ public class Answer {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
-
     private String picture;
 
     @Column(nullable = false)
