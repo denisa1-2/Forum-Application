@@ -1,60 +1,96 @@
 package com.forum.app.controller;
 
 import com.forum.app.entity.User;
-import com.forum.app.service.UserService;
+import com.forum.app.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    private Long getLoggedUserId(HttpSession session) {
-        Object userId = session.getAttribute("loggedUserId");
-
-        if (userId == null) {
-            throw new RuntimeException("No user is logged in");
-        }
-
-        return (Long) userId;
-    }
-
-    @GetMapping
-    public Iterable<User> getAllUsers() {
-        return userService.getAllUsers();
+    public UserController(UserRepository userRepository,  PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/me")
-    public User getCurrentUser(HttpSession session) {
-        Long userId = getLoggedUserId(session);
-        return userService.getUserById(userId);
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/me")
-    public User updateCurrentUser(@RequestParam String username, @RequestParam String email,  HttpSession session) {
-        Long userId = getLoggedUserId(session);
-        return userService.updateUser(userId, username, email);
+    public ResponseEntity<?> updateCurrentUser(
+            @RequestParam String username,
+            @RequestParam String email,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUsername(username);
+        user.setEmail(email);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<String> deleteCurrentUser(HttpSession session) {
-        Long userId = getLoggedUserId(session);
-        userService.deleteUser(userId);
+    public ResponseEntity<?> deleteCurrentUser(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+
+        userRepository.deleteById(userId);
         session.invalidate();
-        return ResponseEntity.ok("Current user has been deleted");
+
+        return ResponseEntity.ok("User deleted successfully");
     }
 
     @PutMapping("/me/password")
-    public ResponseEntity<String> changePassword(@RequestParam String oldPassword, @RequestParam String newPassword, HttpSession session) {
-        Long userId = getLoggedUserId(session);
-        userService.changePassword(userId, oldPassword, newPassword);
-        return ResponseEntity.ok("Password has been changed successfully");
+    public ResponseEntity<?> updatePassword(
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return ResponseEntity.badRequest().body("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Password updated successfully");
     }
 }
