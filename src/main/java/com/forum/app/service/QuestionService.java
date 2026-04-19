@@ -59,6 +59,10 @@ public class QuestionService {
         return questionRepository.findByAuthorId(userId);
     }
 
+    public List<Question> filterQuestionsByUsername(String username) {
+        return questionRepository.findByAuthorUsernameIgnoreCase(username);
+    }
+
     public void deleteQuestion(Long idUser ,Long idQuestion) {
         Optional<Question> existingQuestion=questionRepository.findById(idQuestion);
         if(!existingQuestion.isPresent()) {

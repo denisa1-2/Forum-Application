@@ -33,6 +33,13 @@ public class TagService {
         }
         for(Tag tag : tags) {
             String tagName = tag.getName().trim().toLowerCase();
+
+            boolean alreadyExists = finalTags.stream()
+                    .anyMatch(t -> t.getName().equals(tagName));
+
+            if (alreadyExists) {
+                continue;
+            }
             Optional<Tag> existingTag = tagRepository.findByName(tagName);
 
             if(!existingTag.isPresent()) {

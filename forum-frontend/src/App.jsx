@@ -7,7 +7,10 @@ import ProfilePage from "./pages/ProfilePage.jsx";
 import EditProfilePage from "./pages/EditProfilePage.jsx";
 import ChangePasswordPage  from "./pages/ChangePasswordPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
-
+import QuestionsPage from "./pages/QuestionsPage.jsx";
+import CreateQuestionPage from "./pages/CreateQuestionPage.jsx";
+import EditQuestionPage from "./pages/EditQuestionPage.jsx";
+import QuestionDetailsPage from "./pages/QuestionDetailsPage.jsx";
 
 function App() {
     return (
@@ -46,6 +49,28 @@ function App() {
                     </ProtectedRoute>
                     }
                     />
+
+
+                <Route
+                    path="/questions"
+                    element={<QuestionsPage />}
+                />
+
+                <Route
+                    path="/questions/create"
+                    element={<CreateQuestionPage
+                    />}
+                />
+
+                <Route
+                    path="/questions/edit/:id"
+                    element={<EditQuestionPage />}
+                />
+
+                <Route
+                    path="/questions/:id"
+                    element={<QuestionDetailsPage />}
+                />
             </Routes>
         </>
     );

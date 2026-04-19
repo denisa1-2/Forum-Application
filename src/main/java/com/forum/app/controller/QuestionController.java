@@ -17,7 +17,7 @@ public class QuestionController {
     }
 
     private Long getLoggedUserId(HttpSession session) {
-        Object userId = session.getAttribute("loggedUserId");
+        Object userId = session.getAttribute("userId");
 
         if (userId == null) {
             throw  new RuntimeException("No user is logged in");
@@ -56,6 +56,16 @@ public class QuestionController {
     public List<Question> getMyQuestions(HttpSession session) {
         Long userId = getLoggedUserId(session);
         return questionService.filterQuestionsByUser(userId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Question> getQuestionsByUser(@PathVariable Long userId) {
+        return questionService.filterQuestionsByUser(userId);
+    }
+
+    @GetMapping("/user")
+    public List<Question> getQuestionsByUsername(@RequestParam String username){
+        return questionService.filterQuestionsByUsername(username);
     }
 
     @DeleteMapping("/{questionId}")

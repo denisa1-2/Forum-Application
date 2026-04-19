@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/answers")
 @AllArgsConstructor
+@RequestMapping("/answers")
 public class AnswerController {
 
     private final AnswerService answerService;

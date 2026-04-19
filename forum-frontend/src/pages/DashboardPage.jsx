@@ -1,30 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-
-const sampleQuestions = [
-    {
-        id: 1,
-        title: "How can I prepare for the database exam?",
-        description: "I need tips and useful resources for the final database exam.",
-        author: "Maria",
-        replies: 4,
-    },
-    {
-        id: 2,
-        title: "Best stack for a student project?",
-        description: "I want to build a full-stack project. What technologies should I choose?",
-        author: "Alex",
-        replies: 7,
-    },
-    {
-        id: 3,
-        title: "How do I organize a Spring Boot app?",
-        description: "I am confused about controller, service and repository layers.",
-        author: "Ioana",
-        replies: 3,
-    },
-];
+import {getAllQuestions} from "../services/questionService.js";
 
 const DashboardPage = () => {
     const { user, logout } = useAuth();
@@ -34,6 +11,8 @@ const DashboardPage = () => {
     const [darkMode, setDarkMode] = useState(
         localStorage.getItem("darkMode") === "true"
     );
+    const [recentQuestions, setRecentQuestions] = useState([]);
+
 
     useEffect(() => {
         if (darkMode) {
@@ -44,6 +23,10 @@ const DashboardPage = () => {
 
         localStorage.setItem("darkMode", darkMode);
     }, [darkMode]);
+
+    useEffect(() => {
+        loadRecentQuestions();
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -56,6 +39,15 @@ const DashboardPage = () => {
 
     const toggleDarkMode = () => {
         setDarkMode((prev) => !prev);
+    };
+
+    const loadRecentQuestions = async () => {
+        try {
+            const data = await getAllQuestions();
+            setRecentQuestions(data.slice(0, 3));
+        } catch (error) {
+            console.error("Error loading recent questions:", error);
+        }
     };
 
     return (
@@ -145,15 +137,20 @@ const DashboardPage = () => {
                         <div style={styles.sectionCard}>
                             <h3 style={styles.sectionTitle}>Recent Questions</h3>
 
-                            {sampleQuestions.map((question) => (
+                            {recentQuestions.map((question) => (
                                 <div key={question.id} style={styles.questionCard}>
                                     <h4 style={styles.questionTitle}>{question.title}</h4>
-                                    <p style={styles.questionDescription}>{question.description}</p>
+                                    <p style={styles.questionDescription}> {question.text || "No description available"}</p>
                                     <p style={styles.questionMeta}>
-                                        Posted by <strong>{question.author}</strong> • {question.replies} replies
+                                        Posted by <strong>{question.author?.username || "Unknown"}</strong>
                                     </p>
                                 </div>
                             ))}
+                            <div style={styles.seeAllContainer}>
+                            <Link to="/questions" style={styles.seeAllLink}>
+                                    See all questions →
+                                </Link>
+                            </div>
                         </div>
                     </div>
 
@@ -340,6 +337,17 @@ const styles = {
         borderRadius: "999px",
         fontSize: "0.85rem",
         color: "#5a0c1f",
+    },
+
+    seeAllContainer: {
+        marginTop: "0.5rem",
+        textAlign: "right",
+    },
+
+    seeAllLink: {
+        textDecoration: "none",
+        color: "#5a0c1f",
+        fontWeight: "bold",
     },
 };
 
