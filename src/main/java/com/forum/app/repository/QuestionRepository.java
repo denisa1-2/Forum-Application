@@ -14,4 +14,5 @@ public interface QuestionRepository  extends JpaRepository<Question, Long> {
     List<Question> findByTagsNameIgnoreCase(String name);
     List<Question> findByTitleContainingIgnoreCase(String title);
     List<Question> findByAuthorId(Long id);
+    List<Question> findByAuthorUsernameIgnoreCase(String username);
 }
