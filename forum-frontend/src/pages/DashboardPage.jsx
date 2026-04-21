@@ -148,7 +148,7 @@ const DashboardPage = () => {
                             ))}
                             <div style={styles.seeAllContainer}>
                             <Link to="/questions" style={styles.seeAllLink}>
-                                    See all questions →
+                                    See all questions
                                 </Link>
                             </div>
                         </div>

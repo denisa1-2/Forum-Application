@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import { getAllTags } from "../services/tagService.js";
+import {styles} from "../styles/forumTheme.js";
 
 const QuestionForm =({onSubmit, initialData ={} }) =>
 {
@@ -59,16 +60,13 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
         }
     };
 
-    const inputStyle = {
-        width: "50%",
-    };
 
     return (
         <form onSubmit={handleSubmit}>
             <div>
                 <label>Title</label><br/>
                 <input
-                    style={inputStyle}
+                    style={styles.input}
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -78,7 +76,7 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             <div>
                 <label>Text</label><br/>
                 <textarea
-                    style={inputStyle}
+                    style={styles.textarea}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
@@ -87,7 +85,7 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             <div>
                 <label>Picture URL</label><br/>
                 <input
-                    style={inputStyle}
+                    style={styles.input}
                     type="text"
                     value={picture}
                     onChange={(e) => setPicture(e.target.value)}
@@ -97,7 +95,7 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             <div>
                 <label>Tags (comma separated)</label><br/>
                 <input
-                    style={inputStyle}
+                    style={styles.input}
                     type="text"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
@@ -111,7 +109,11 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
                         type="button"
                         key={tag.id}
                         onClick={() =>handleAddExistingTag(tag.name)}
-                        style={{marginRight:"0.5rem",marginBottom: "0.5rem"}}
+                        style={{...styles.secondaryButton,
+                            marginRight: "0.5rem",
+                            marginBottom: "0.5rem",
+                            padding: "0.45rem 0.8rem"
+                        }}
                     >
                         {tag.name}
                     </button>
@@ -119,7 +121,9 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             </div>
 
             <button
-                type="submit">Submit
+                type="submit"
+                style={styles.primaryButton}
+            >Submit
             </button>
         </form>
     );

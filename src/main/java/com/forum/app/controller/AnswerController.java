@@ -16,7 +16,7 @@ public class AnswerController {
     private final AnswerService answerService;
 
     private Long getLoggedUserId(HttpSession session) {
-        Object userId = session.getAttribute("loggedUserId");
+        Object userId = session.getAttribute("userId");
 
         if (userId == null) {
             throw  new RuntimeException("No user is logged in");
