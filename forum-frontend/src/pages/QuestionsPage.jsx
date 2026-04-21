@@ -4,7 +4,7 @@ import QuestionCard from "../components/QuestionCard.jsx";
 import { Link } from "react-router-dom";
 import QuestionFilter from "../components/QuestionFilter.jsx";
 import { getCurrentUser } from "../services/userService.js";
-import jsonQuestions from "../json/questions.json";
+import { styles } from "../styles/forumTheme.js";
 
 const QuestionsPage=() =>{
     const [questions,setQuestions]=useState([]);
@@ -107,34 +107,59 @@ const QuestionsPage=() =>{
     }
 
     return (
+        <div style={styles.page}>
+            <div style={styles.main}>
+                <div style={{marginBottom: "1rem"}}>
+                    <Link to="/dashboard" style={styles.linkButton}>
+                        Back to dashboard
+                    </Link>
+                </div>
 
-        <div style={{padding: "2rem"}}>
-            <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-                <h1>All questions</h1>
+                <div
+                    style={{
+                        ...styles.card,
+                        marginBottom: "1.5rem",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: "1rem",
+                        flexWrap: "wrap",
+                    }}
+                >
+                    <div>
+                        <h1 style={{ marginTop: 0, marginBottom: "0.5rem" }}>All questions</h1>
+                        <p style={{ margin: 0, color: "#444" }}>
+                            Search, filter and manage forum questions.
+                        </p>
+                    </div>
 
-                <Link to="/questions/create">
-                    <button>Create Question</button>
-                </Link>
+                    <Link to="/questions/create" style={styles.primaryButton}>
+                       Create Question
+                    </Link>
+                </div>
+
+                <QuestionFilter
+                    onSearchTitle={handleSearchTitle}
+                    onFilterTag={handleFilterTag}
+                    onFilterUser={handleFilterUser}
+                    onMyQuestions={handleMyQuestions}
+                    onReset={handleReset}
+                />
+
+                <div style={styles.card}>
+                    {questions.length === 0 ? (
+                        <p>There are no existing questions</p>) :
+                        (questions.map((question) => (
+                            <QuestionCard
+                                key={question.id}
+                                question={question}
+                                onDelete={handleDeleteQuestion}
+                                currentUser={currentUser}
+                            />
+                        ))
+                    )}
+                </div>
             </div>
-
-            <QuestionFilter
-                onSearchTitle={handleSearchTitle}
-                onFilterTag={handleFilterTag}
-                onFilterUser={handleFilterUser}
-                onMyQuestions={handleMyQuestions}
-                onReset={handleReset}
-            />
-
-            {questions.length === 0 ? (
-                <p>There are no existing questions</p>) : (questions.map((question) => (
-                    <QuestionCard
-                        key={question.id}
-                        question={question}
-                        onDelete={handleDeleteQuestion}
-                        currentUser={currentUser}
-                    />
-                ))
-            )}
         </div>
     );
 };

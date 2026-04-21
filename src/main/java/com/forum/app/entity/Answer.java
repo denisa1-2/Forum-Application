@@ -1,15 +1,12 @@
 package com.forum.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.forum.app.service.QuestionService;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
