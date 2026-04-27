@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers("/questions/**").permitAll()
                         .requestMatchers("/tags/**").permitAll()
                         .requestMatchers("/answers/**").permitAll()
+                        .requestMatchers("/votes/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
