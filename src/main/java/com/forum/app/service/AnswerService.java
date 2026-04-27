@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,6 +20,7 @@ public class AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
+    private final VoteService voteService;
 
     public Answer createAnswer(Long userId, Long questionId, Answer answer){
         User author = userRepository.findById(userId)
@@ -26,6 +28,10 @@ public class AnswerService {
 
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
+
+        if("SOLVED".equals(question.getStatus())){
+            throw new RuntimeException("This question is already solved. No more answers can be added.");
+        }
 
         long answersBeforeCreate = answerRepository.countByQuestionId(questionId);
 
@@ -36,7 +42,7 @@ public class AnswerService {
 
         Answer savedAnswer = answerRepository.save(answer);
 
-        if(answersBeforeCreate == 0){
+        if(answersBeforeCreate == 0 && "RECEIVED".equals(question.getStatus())){
             question.setStatus("IN_PROGRESS");
             questionRepository.save(question);
         }
@@ -48,7 +54,11 @@ public class AnswerService {
         questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
 
-        return answerRepository.findByQuestionId(questionId);
+        List<Answer> answers = answerRepository.findByQuestionId(questionId);
+
+        answers.sort(Comparator.comparingInt((Answer answer) -> voteService.getAnswerVoteCount(answer.getId())).reversed());
+
+        return answers;
     }
 
     public Answer updateAnswer(Long userId, Long answerId, Answer updatedAnswer){
@@ -57,6 +67,10 @@ public class AnswerService {
 
         if(!existingAnswer.getAuthor().getId().equals(userId)){
             throw new RuntimeException("User not authorized to update this answer");
+        }
+
+        if("SOLVED".equals(existingAnswer.getQuestion().getStatus())){
+            throw new RuntimeException("This question is already solved. Answers can no longer be edited.");
         }
 
         existingAnswer.setText(updatedAnswer.getText());
@@ -73,6 +87,30 @@ public class AnswerService {
             throw new RuntimeException("User not authorized to delete this answer");
         }
 
+        if("SOLVED".equals(existingAnswer.getQuestion().getStatus())){
+            throw new RuntimeException("This question is already solved. Answers can no longer be deleted.");
+        }
+
         answerRepository.delete(existingAnswer);
+    }
+
+    public String acceptAnswer(Long userId, Long answerId){
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new RuntimeException("Answer not found"));
+
+        Question question = answer.getQuestion();
+
+        if(!question.getAuthor().getId().equals(userId)){
+            throw new RuntimeException("Only the question author can accept an answer");
+        }
+
+        if("SOLVED".equals(question.getStatus())){
+            throw new RuntimeException("This question is already solved.");
+        }
+
+        question.setStatus("SOLVED");
+        questionRepository.save(question);
+
+        return "Answer accepted. Question marked as solved.";
     }
 }
