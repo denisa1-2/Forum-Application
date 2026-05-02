@@ -1,45 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import {getAllQuestions} from "../services/questionService.js";
+import { getAllQuestions } from "../services/questionService.js";
 
 const DashboardPage = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const [darkMode, setDarkMode] = useState(
-        localStorage.getItem("darkMode") === "true"
-    );
     const [recentQuestions, setRecentQuestions] = useState([]);
-
-
-    useEffect(() => {
-        if (darkMode) {
-            document.body.classList.add("dark-mode");
-        } else {
-            document.body.classList.remove("dark-mode");
-        }
-
-        localStorage.setItem("darkMode", darkMode);
-    }, [darkMode]);
 
     useEffect(() => {
         loadRecentQuestions();
     }, []);
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            navigate('/', { replace: true });
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
-
-    const toggleDarkMode = () => {
-        setDarkMode((prev) => !prev);
-    };
 
     const loadRecentQuestions = async () => {
         try {
@@ -50,19 +23,18 @@ const DashboardPage = () => {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate("/", { replace: true });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
     return (
-        <div
-            style={{
-                ...styles.page,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
-            }}
-        >
-            <header
-                style={{
-                    ...styles.header,
-                    color: "#000",
-                }}
-            >
+        <div style={styles.page}>
+            <header style={styles.header}>
                 <div>
                     <h2 style={styles.logo}>Forum Application</h2>
                 </div>
@@ -89,31 +61,6 @@ const DashboardPage = () => {
                                 Change Password
                             </Link>
 
-                            <div style={styles.toggleRow}>
-                                <span>Dark Mode</span>
-                                <label style={styles.switch}>
-                                    <input
-                                        type="checkbox"
-                                        checked={darkMode}
-                                        onChange={toggleDarkMode}
-                                        style={{ display: "none" }}
-                                    />
-                                    <span
-                                        style={{
-                                            ...styles.slider,
-                                            backgroundColor: darkMode ? "#37000d" : "#ccc",
-                                        }}
-                                    >
-                    <span
-                        style={{
-                            ...styles.sliderCircle,
-                            transform: darkMode ? "translateX(18px)" : "translateX(0)",
-                        }}
-                    />
-                  </span>
-                                </label>
-                            </div>
-
                             <button onClick={handleLogout} style={styles.logoutButton}>
                                 Logout
                             </button>
@@ -128,7 +75,8 @@ const DashboardPage = () => {
                         Welcome back, {user?.username || "User"}!
                     </h1>
                     <p style={styles.heroText}>
-                        Explore recent questions, manage your account and continue your activity.
+                        Explore recent questions, manage your account and continue your
+                        activity.
                     </p>
                 </section>
 
@@ -140,14 +88,18 @@ const DashboardPage = () => {
                             {recentQuestions.map((question) => (
                                 <div key={question.id} style={styles.questionCard}>
                                     <h4 style={styles.questionTitle}>{question.title}</h4>
-                                    <p style={styles.questionDescription}> {question.text || "No description available"}</p>
+                                    <p style={styles.questionDescription}>
+                                        {question.text || "No description available"}
+                                    </p>
                                     <p style={styles.questionMeta}>
-                                        Posted by <strong>{question.author?.username || "Unknown"}</strong>
+                                        Posted by{" "}
+                                        <strong>{question.author?.username || "Unknown"}</strong>
                                     </p>
                                 </div>
                             ))}
+
                             <div style={styles.seeAllContainer}>
-                            <Link to="/questions" style={styles.seeAllLink}>
+                                <Link to="/questions" style={styles.seeAllLink}>
                                     See all questions
                                 </Link>
                             </div>
@@ -161,8 +113,8 @@ const DashboardPage = () => {
                             <div style={styles.tagContainer}>
                                 {["Java", "React", "Spring", "Database", "Exams"].map((tag) => (
                                     <span key={tag} style={styles.tag}>
-                                         {tag}
-                                     </span>
+                    {tag}
+                  </span>
                                 ))}
                             </div>
                         </div>
@@ -176,6 +128,7 @@ const DashboardPage = () => {
 const styles = {
     page: {
         minHeight: "100vh",
+        backgroundColor: "#f9ede8",
     },
     header: {
         height: "72px",
@@ -185,6 +138,7 @@ const styles = {
         padding: "0 2rem",
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
         position: "relative",
+        color: "#000",
     },
     logo: {
         margin: 0,
@@ -221,36 +175,6 @@ const styles = {
         textDecoration: "none",
         color: "#000",
         borderRadius: "6px",
-    },
-    toggleRow: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "0.75rem",
-        color: "#000",
-    },
-    switch: {
-        position: "relative",
-        display: "inline-block",
-        width: "42px",
-        height: "24px",
-        cursor: "pointer",
-    },
-    slider: {
-        position: "absolute",
-        inset: 0,
-        borderRadius: "24px",
-        transition: "0.2s",
-    },
-    sliderCircle: {
-        position: "absolute",
-        height: "18px",
-        width: "18px",
-        left: "3px",
-        top: "3px",
-        backgroundColor: "white",
-        borderRadius: "50%",
-        transition: "0.2s",
     },
     logoutButton: {
         width: "100%",
@@ -330,7 +254,6 @@ const styles = {
         flexWrap: "wrap",
         gap: "0.5rem",
     },
-
     tag: {
         padding: "0.4rem 0.8rem",
         backgroundColor: "#f7e2e2",
@@ -338,12 +261,10 @@ const styles = {
         fontSize: "0.85rem",
         color: "#5a0c1f",
     },
-
     seeAllContainer: {
         marginTop: "0.5rem",
         textAlign: "right",
     },
-
     seeAllLink: {
         textDecoration: "none",
         color: "#5a0c1f",
