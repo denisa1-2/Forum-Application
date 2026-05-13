@@ -4,19 +4,16 @@ import { getQuestionById } from "../services/questionService.js";
 import { createAnswer, deleteAnswer, updateAnswer, getAnswersByQuestion} from "../services/answerService.js";
 import { getCurrentUser } from "../services/userService.js";
 import { styles } from "../styles/forumTheme.js";
+import AnswerForm from "../components/AnswerForm.jsx";
+import AnswerList from "../components/AnswerList.jsx";
+
 
 const QuestionDetailsPage = () => {
     const { id } = useParams();
     const [question, setQuestion] = useState(null);
 
     const [answers, setAnswers] = useState([]);
-    const [answerText, setAnswerText] = useState("");
-    const [answerPicture, setAnswerPicture] = useState("");
-    const [submittingAnswer, setSubmittingAnswer] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    const [editingAnswerId, setEditingAnswerId] = useState(null);
-    const [editText, setEditText] = useState("");
-    const [editPicture, setEditPicture] = useState("");
 
     useEffect(() => {
         loadQuestion();
@@ -52,29 +49,14 @@ const QuestionDetailsPage = () => {
         }
     };
 
-    const handleCreateAnswer = async (e) => {
-        e.preventDefault();
-
-        if(!answerText.trim()){
-            alert("Answer text is required.");
-            return;
-        }
-
-        try {
-            setSubmittingAnswer(true);
-
-            await createAnswer(id, {text: answerText, picture: answerPicture});
-
-            setAnswerText("");
-            setAnswerPicture("");
-
+    const handleCreateAnswer = async (answerBody) => {
+        try{
+            await createAnswer(id, answerBody);
             await loadAnswers();
-        } catch(error) {
-            console.error("Error creating answers", error);
+        }catch(error){
+            console.error("Error creating answer", error);
             console.log(error.response);
             alert("Could not create answer.");
-        }finally {
-            setSubmittingAnswer(false);
         }
     };
 
@@ -91,31 +73,11 @@ const QuestionDetailsPage = () => {
         }
     };
 
-    const startEditingAnswer = (answer) => {
-        setEditingAnswerId(answer.id);
-        setEditText(answer.text || "");
-        setEditPicture(answer.picture || "");
-    };
-
-    const cancelEditingAnswer = () => {
-        setEditingAnswerId(null);
-        setEditText("");
-        setEditPicture("");
-    };
-
-    const handleUpdateAnswer = async (e, answerId) => {
-        e.preventDefault();
-
-        if(!editText.trim()){
-            alert("Answer text is required.");
-            return;
-        }
-
-        try {
-            await updateAnswer(answerId, {text: editText, picture: editPicture});
-            cancelEditingAnswer();
+    const handleUpdateAnswer = async (answerId, updatedAnswer) => {
+        try{
+            await updateAnswer(answerId, updatedAnswer);
             await loadAnswers();
-        } catch (error) {
+        }catch (error) {
             console.error("Error updating answer", error);
             alert("Could not update answer.");
         }
@@ -175,132 +137,21 @@ const QuestionDetailsPage = () => {
             }}
         >
             <h3 style={{marginTop: 0}}>Add answer</h3>
-            <form onSubmit={handleCreateAnswer}>
-                <textarea
-                    placeholder="Write your answer..."
-                    value={answerText}
-                    onChange={(e) => setAnswerText(e.target.value)}
-                    rows="4"
-                    style={styles.textarea}
-                />
 
-                <input
-                    type="text"
-                    placeholder="Image URL (optional)"
-                    value={answerPicture}
-                    onChange={(e) => setAnswerPicture(e.target.value)}
-                    style={styles.input}
-                />
-
-                <button type="submit" disabled={submittingAnswer} style={styles.primaryButton}>{submittingAnswer ? "Posting" : "Post Answer"}</button>
-            </form>
+            <AnswerForm onSubmit={handleCreateAnswer}/>
         </div>
+
         <div style={styles.card}>
             <h3 style={{ marginTop: 0 }}>Answers</h3>
 
-            {answers.length === 0 ? (
-                <p>No answers yet.</p>
-            ) : (
-                answers.map((answer) => {
-                    const isAuthor =
-                        currentUser && currentUser.id === answer.author?.id;
-                    const isEditing = editingAnswerId === answer.id;
+            <AnswerList answers={answers}
+                        currentUser={currentUser}
+                        onUpdate={handleUpdateAnswer}
+                        onDelete={handleDeleteAnswer}/>
 
-                    return (
-                        <div
-                            key={answer.id}
-                            style={{
-                                ...styles.softCard,
-                                marginBottom: "1rem",
-                                boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
-                        }}
-                    >
-                        <p>
-                            <strong>Author:</strong> {answer.author?.username || "Unknown"}
-                        </p>
-
-                        <p>
-                            <strong>Date:</strong>{" "}
-                            {answer.creationDateTime
-                                ? new Date(answer.creationDateTime).toLocaleString()
-                                : ""}
-                        </p>
-
-                        {isEditing ? (
-                            <form onSubmit={(e) => handleUpdateAnswer(e, answer.id)}>
-                                <textarea
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                    rows="4"
-                                    style={styles.textarea}
-                                />
-
-                                <input
-                                    type="text"
-                                    value={editPicture}
-                                    onChange={(e) => setEditPicture(e.target.value)}
-                                    placeholder="Image URL (optional)"
-                                    style={styles.input}
-                                />
-
-                                <div style={{ display: "flex", gap: "10px" }}>
-                                    <button type="submit" style={styles.primaryButton}>Update</button>
-                                    <button type="button" onClick={cancelEditingAnswer} style={styles.secondaryButton}>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        ) : (
-                            <>
-                                <p>
-                                    <strong>Text:</strong> {answer.text}
-                                </p>
-
-                                {answer.picture && (
-                                    <img
-                                        src={answer.picture}
-                                        alt="answer"
-                                        style={{
-                                            maxWidth: "250px",
-                                            marginTop: "0.5rem",
-                                            borderRadius: "8px"
-                                        }}
-                                    />
-                                )}
-
-                                {isAuthor && (
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "10px",
-                                            marginTop: "1rem"
-                                        }}
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => startEditingAnswer(answer)}
-                                            style={styles.secondaryButton}
-                                        >
-                                            Edit
-                                        </button>
-
-                                        <button type="button"
-                                                onClick={() => handleDeleteAnswer(answer.id)}
-                                                style={styles.secondaryButton}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                );
-            })
-        )}
         </div>
-        </div>
-        </div>
+    </div>
+  </div>
     );
 };
 

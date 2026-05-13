@@ -14,7 +14,7 @@ const AnswerCard = ({ answer, currentUser, onUpdate, onDelete}) => {
     return (
         <div
             style={{
-                ...styles.softCard,
+                ...styles.innerCard,
                 marginBottom: "1rem",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
                 backgroundColor: "#f7e2e2"
@@ -52,8 +52,8 @@ const AnswerCard = ({ answer, currentUser, onUpdate, onDelete}) => {
                     gap: "10px",
                     marginTop: "1rem"
                 }}>
-                    <button style={styles.button} onClick={() => setIsEditing(true)}>Edit</button>
-                    <button style={styles.buttonSecondary} onClick={() => onDelete(answer.id)}>Delete</button>
+                    <button style={styles.secondaryButton} onClick={() => setIsEditing(true)}>Edit</button>
+                    <button style={styles.secondaryButton} onClick={() => onDelete(answer.id)}>Delete</button>
                 </div>
             )}
         </div>

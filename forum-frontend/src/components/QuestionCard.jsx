@@ -8,7 +8,7 @@ const QuestionCard = ({question,onDelete,currentUser}) => {
     const isAuthor =currentUser && currentUser.id === question.author?.id;
     return(
         <div style={{
-            ...styles.softCard,
+            ...styles.innerCard,
             marginBottom: "1rem",
             boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {styles} from "../styles/forumTheme.js";
 
 const AnswerForm = ({ onSubmit, initialData = null, onCancel = null}) => {
     const [text, setText] = useState(initialData?.text || "");
@@ -22,11 +23,9 @@ const AnswerForm = ({ onSubmit, initialData = null, onCancel = null}) => {
 
     return (<form onSubmit={handleSubmit}
                   style={{
+                        ...styles.innerCard,
                         marginTop: "1rem",
-                        marginBottom: "1rem",
-                        padding: "1rem",
-                        border: "1px solid #ddd",
-                        borderRadius: "8px"
+                        marginBottom: "1rem"
                   }}
             >
                 <textarea placeholder="Write your answer..."
@@ -34,8 +33,7 @@ const AnswerForm = ({ onSubmit, initialData = null, onCancel = null}) => {
                           onChange={(e) => setText(e.target.value)}
                           rows="4"
                           style={{
-                              width: "100%",
-                              padding: "0.7rem",
+                              ...styles.textarea,
                               marginBottom: "1rem"
                           }}
                 />
@@ -45,20 +43,23 @@ const AnswerForm = ({ onSubmit, initialData = null, onCancel = null}) => {
                     value={picture}
                     onChange={(e) => setPicture(e.target.value)}
                     style={{
-                        width: "100%",
-                        padding: "0.7rem",
+                        ...styles.input,
                         marginBottom: "1rem"
                     }}
                 />
                 <div style={{ display: "flex", gap: "10px"}}>
-                    <button type="submit">
+                    <button type="submit"
+                            style={styles.primaryButton}
+                    >
                         {initialData ? "Update Answer" : "Post Answer"}
                     </button>
 
                     {onCancel && (
                         <button
                             type="button"
-                            onClick={onCancel}>Cancel</button>
+                            onClick={onCancel}
+                            style={styles.secondaryButton}
+                        >Cancel</button>
                     )}
                 </div>
             </form>
