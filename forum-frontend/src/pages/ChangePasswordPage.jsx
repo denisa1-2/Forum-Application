@@ -4,7 +4,6 @@ import { updatePassword } from "../services/userService.js";
 
 const ChangePasswordPage = () => {
     const navigate = useNavigate();
-    const darkMode = localStorage.getItem("darkMode") === "true";
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/;
 
@@ -66,7 +65,7 @@ const ChangePasswordPage = () => {
         <div
             style={{
                 ...styles.container,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
+                backgroundColor: "#f9ede8",
             }}
         >
             <div style={styles.card}>
