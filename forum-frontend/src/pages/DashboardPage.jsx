@@ -9,6 +9,7 @@ const DashboardPage = () => {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [recentQuestions, setRecentQuestions] = useState([]);
+    const [tags, setTags] = useState([]);
 
     useEffect(() => {
         loadRecentQuestions();
@@ -18,6 +19,22 @@ const DashboardPage = () => {
         try {
             const data = await getAllQuestions();
             setRecentQuestions(data.slice(0, 3));
+
+            const allTags = data.flatMap((question) => question.tags || []);
+
+            const uniqueTags = [];
+
+            allTags.forEach((tag) => {
+                const alreadyExists = uniqueTags.some(
+                    (existingTag) => existingTag.name === tag.name
+                );
+
+                if (!alreadyExists) {
+                    uniqueTags.push(tag);
+                }
+            });
+
+            setTags(uniqueTags.slice(0, 5));
         } catch (error) {
             console.error("Error loading recent questions:", error);
         }
@@ -111,11 +128,15 @@ const DashboardPage = () => {
                             <h3 style={styles.sectionTitle}>Tags</h3>
 
                             <div style={styles.tagContainer}>
-                                {["Java", "React", "Spring", "Database", "Exams"].map((tag) => (
-                                    <span key={tag} style={styles.tag}>
-                    {tag}
-                  </span>
-                                ))}
+                                {tags.length === 0 ? (
+                                    <p style={{ margin: 0 }}>No tags available</p>
+                                ) : (
+                                    tags.map((tag) => (
+                                        <span key={tag.id || tag.name} style={styles.tag}>
+                {tag.name}
+            </span>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
