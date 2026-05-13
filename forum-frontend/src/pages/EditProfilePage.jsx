@@ -6,8 +6,6 @@ const EditProfilePage = () => {
     const { user, updateProfile, deleteAccount, loading } = useAuth();
     const navigate = useNavigate();
 
-    const darkMode = localStorage.getItem("darkMode") === "true";
-
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -84,7 +82,7 @@ const EditProfilePage = () => {
         <div
             style={{
                 ...styles.container,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
+                backgroundColor: "#f9ede8",
             }}
         >
             <div style={styles.card}>

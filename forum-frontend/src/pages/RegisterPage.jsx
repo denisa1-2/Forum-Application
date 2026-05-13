@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 const RegisterPage = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
-    const darkMode = localStorage.getItem("darkMode") === "true";
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/;
 
     const [formData, setFormData] = useState({
@@ -61,7 +60,7 @@ const RegisterPage = () => {
         <div
             style={{
                 ...styles.container,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
+                backgroundColor: "#f9ede8",
             }}
         >
             <div style={styles.card}>
