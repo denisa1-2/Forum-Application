@@ -6,7 +6,7 @@ import { getCurrentUser } from "../services/userService.js";
 import { styles } from "../styles/forumTheme.js";
 import AnswerForm from "../components/AnswerForm.jsx";
 import AnswerList from "../components/AnswerList.jsx";
-
+import QuestionVoteBox from "../components/QuestionVoteBox.jsx";
 
 const QuestionDetailsPage = () => {
     const { id } = useParams();
@@ -83,6 +83,14 @@ const QuestionDetailsPage = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        if (status === "SOLVED") return "green";
+        if (status === "IN_PROGRESS") return "orange";
+        if (status === "RECEIVED" || status === "CREATED") return "blue";
+        return "gray";
+    };
+
+
     if (!question) return <p style={{ padding: "1rem" }}>Loading...</p>;
 
     return (
@@ -99,9 +107,22 @@ const QuestionDetailsPage = () => {
                      <strong>Author:</strong> {question.author?.username}
                 </p>
 
-                <p>
-                    <strong>Status:</strong> {question.status}
-                </p>
+                    <p>
+                        <strong>Status:</strong>{" "}
+                        <span
+                            style={{
+                                padding: "4px 8px",
+                                borderRadius: "8px",
+                                color: "white",
+                                backgroundColor: getStatusColor(question.status),
+                                fontSize: "12px",
+                                fontWeight: "bold"
+                            }}
+                        >{question.status === "CREATED" ? "RECEIVED" : question.status}
+                        </span>
+                    </p>
+
+                    <QuestionVoteBox questionId={question.id} />
 
                 <p>
                     <strong>Date:</strong>{" "}
