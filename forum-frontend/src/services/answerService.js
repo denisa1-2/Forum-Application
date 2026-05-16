@@ -33,3 +33,13 @@ export const deleteAnswer = async (answerId) => {
     );
     return response.data;
 };
+
+export const acceptAnswer = async(answerId) => {
+    const response = await axios.put(
+        `${API_URL}/${answerId}/accept`,
+        {},
+        {withCredentials: true}
+    );
+
+    return response.data;
+}
