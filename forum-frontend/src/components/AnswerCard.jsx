@@ -29,7 +29,7 @@ const AnswerCard = ({ answer, currentUser, question, onUpdate, onDelete, onAccep
                 <div style={{marginBottom: "0.75rem",
                             fontWeight: "bold",
                             color: "green",
-                }}>Accept answer</div>
+                }}>Accepted answer</div>
             )}
             <div style={{ marginBottom: "0.5rem"}}><strong>Author:</strong>
                 {answer.author?.username || "Unknown"}</div>
@@ -63,7 +63,7 @@ const AnswerCard = ({ answer, currentUser, question, onUpdate, onDelete, onAccep
 
                 <div style={{display: "flex",
                             gap: "10px",
-                            margintop: "1rem",
+                            marginTop: "1rem",
                             flexWrap: "wrap",
                         }}
                      >
