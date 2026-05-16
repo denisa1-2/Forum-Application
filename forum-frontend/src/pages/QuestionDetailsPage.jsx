@@ -1,22 +1,19 @@
 import { useEffect, useState} from "react";
-import { Link,useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getQuestionById } from "../services/questionService.js";
-import { createAnswer, deleteAnswer, updateAnswer, getAnswersByQuestion} from "../services/answerService.js";
+import { createAnswer, deleteAnswer, updateAnswer, getAnswersByQuestion, acceptAnswer} from "../services/answerService.js";
 import { getCurrentUser } from "../services/userService.js";
 import { styles } from "../styles/forumTheme.js";
+import AnswerForm from "../components/AnswerForm.jsx";
+import AnswerList from "../components/AnswerList.jsx";
+import QuestionVoteBox from "../components/QuestionVoteBox.jsx";
 
 const QuestionDetailsPage = () => {
     const { id } = useParams();
     const [question, setQuestion] = useState(null);
 
     const [answers, setAnswers] = useState([]);
-    const [answerText, setAnswerText] = useState("");
-    const [answerPicture, setAnswerPicture] = useState("");
-    const [submittingAnswer, setSubmittingAnswer] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    const [editingAnswerId, setEditingAnswerId] = useState(null);
-    const [editText, setEditText] = useState("");
-    const [editPicture, setEditPicture] = useState("");
 
     useEffect(() => {
         loadQuestion();
@@ -52,29 +49,14 @@ const QuestionDetailsPage = () => {
         }
     };
 
-    const handleCreateAnswer = async (e) => {
-        e.preventDefault();
-
-        if(!answerText.trim()){
-            alert("Answer text is required.");
-            return;
-        }
-
-        try {
-            setSubmittingAnswer(true);
-
-            await createAnswer(id, {text: answerText, picture: answerPicture});
-
-            setAnswerText("");
-            setAnswerPicture("");
-
+    const handleCreateAnswer = async (answerBody) => {
+        try{
+            await createAnswer(id, answerBody);
             await loadAnswers();
-        } catch(error) {
-            console.error("Error creating answers", error);
+        }catch(error){
+            console.error("Error creating answer", error);
             console.log(error.response);
             alert("Could not create answer.");
-        }finally {
-            setSubmittingAnswer(false);
         }
     };
 
@@ -91,35 +73,39 @@ const QuestionDetailsPage = () => {
         }
     };
 
-    const startEditingAnswer = (answer) => {
-        setEditingAnswerId(answer.id);
-        setEditText(answer.text || "");
-        setEditPicture(answer.picture || "");
-    };
-
-    const cancelEditingAnswer = () => {
-        setEditingAnswerId(null);
-        setEditText("");
-        setEditPicture("");
-    };
-
-    const handleUpdateAnswer = async (e, answerId) => {
-        e.preventDefault();
-
-        if(!editText.trim()){
-            alert("Answer text is required.");
-            return;
-        }
-
-        try {
-            await updateAnswer(answerId, {text: editText, picture: editPicture});
-            cancelEditingAnswer();
+    const handleUpdateAnswer = async (answerId, updatedAnswer) => {
+        try{
+            await updateAnswer(answerId, updatedAnswer);
             await loadAnswers();
-        } catch (error) {
+        }catch (error) {
             console.error("Error updating answer", error);
             alert("Could not update answer.");
         }
     };
+
+    const handleAcceptAnswer = async (answerId) => {
+        const confirmed = window.confirm("Are you sure you want to accept this answer?");
+
+        if(!confirmed)
+            return;
+
+        try{
+            await acceptAnswer(answerId);
+            await loadQuestion();
+            await loadAnswers();
+        }catch(error){
+            console.error("Error accepting answer", error);
+            alert(error.response?.data || "Could not accept answer.");
+        }
+    };
+
+    const getStatusColor = (status) => {
+        if (status === "SOLVED") return "green";
+        if (status === "IN_PROGRESS") return "orange";
+        if (status === "RECEIVED" || status === "CREATED") return "blue";
+        return "gray";
+    };
+
 
     if (!question) return <p style={{ padding: "1rem" }}>Loading...</p>;
 
@@ -137,9 +123,22 @@ const QuestionDetailsPage = () => {
                      <strong>Author:</strong> {question.author?.username}
                 </p>
 
-                <p>
-                    <strong>Status:</strong> {question.status}
-                </p>
+                    <p>
+                        <strong>Status:</strong>{" "}
+                        <span
+                            style={{
+                                padding: "4px 8px",
+                                borderRadius: "8px",
+                                color: "white",
+                                backgroundColor: getStatusColor(question.status),
+                                fontSize: "12px",
+                                fontWeight: "bold"
+                            }}
+                        >{question.status === "CREATED" ? "RECEIVED" : question.status}
+                        </span>
+                    </p>
+
+                    <QuestionVoteBox questionId={question.id} />
 
                 <p>
                     <strong>Date:</strong>{" "}
@@ -169,139 +168,42 @@ const QuestionDetailsPage = () => {
                 />
             )}
         </div>
-        <div style={{
-            ...styles.card,
-            marginBottom: "1.5rem"
-            }}
-        >
-            <h3 style={{marginTop: 0}}>Add answer</h3>
-            <form onSubmit={handleCreateAnswer}>
-                <textarea
-                    placeholder="Write your answer..."
-                    value={answerText}
-                    onChange={(e) => setAnswerText(e.target.value)}
-                    rows="4"
-                    style={styles.textarea}
-                />
 
-                <input
-                    type="text"
-                    placeholder="Image URL (optional)"
-                    value={answerPicture}
-                    onChange={(e) => setAnswerPicture(e.target.value)}
-                    style={styles.input}
-                />
-
-                <button type="submit" disabled={submittingAnswer} style={styles.primaryButton}>{submittingAnswer ? "Posting" : "Post Answer"}</button>
-            </form>
-        </div>
-        <div style={styles.card}>
-            <h3 style={{ marginTop: 0 }}>Answers</h3>
-
-            {answers.length === 0 ? (
-                <p>No answers yet.</p>
-            ) : (
-                answers.map((answer) => {
-                    const isAuthor =
-                        currentUser && currentUser.id === answer.author?.id;
-                    const isEditing = editingAnswerId === answer.id;
-
-                    return (
-                        <div
-                            key={answer.id}
-                            style={{
-                                ...styles.softCard,
-                                marginBottom: "1rem",
-                                boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
+        {question.status !== "SOLVED" ? (
+             <div style={{...styles.card,
+                            marginBottom: "1.5rem"
                         }}
-                    >
-                        <p>
-                            <strong>Author:</strong> {answer.author?.username || "Unknown"}
-                        </p>
+             >
+                 <h3 style={{marginTop: 0}}>Add answer</h3>
 
-                        <p>
-                            <strong>Date:</strong>{" "}
-                            {answer.creationDateTime
-                                ? new Date(answer.creationDateTime).toLocaleString()
-                                : ""}
-                        </p>
-
-                        {isEditing ? (
-                            <form onSubmit={(e) => handleUpdateAnswer(e, answer.id)}>
-                                <textarea
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                    rows="4"
-                                    style={styles.textarea}
-                                />
-
-                                <input
-                                    type="text"
-                                    value={editPicture}
-                                    onChange={(e) => setEditPicture(e.target.value)}
-                                    placeholder="Image URL (optional)"
-                                    style={styles.input}
-                                />
-
-                                <div style={{ display: "flex", gap: "10px" }}>
-                                    <button type="submit" style={styles.primaryButton}>Update</button>
-                                    <button type="button" onClick={cancelEditingAnswer} style={styles.secondaryButton}>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        ) : (
-                            <>
-                                <p>
-                                    <strong>Text:</strong> {answer.text}
-                                </p>
-
-                                {answer.picture && (
-                                    <img
-                                        src={answer.picture}
-                                        alt="answer"
-                                        style={{
-                                            maxWidth: "250px",
-                                            marginTop: "0.5rem",
-                                            borderRadius: "8px"
-                                        }}
-                                    />
-                                )}
-
-                                {isAuthor && (
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "10px",
-                                            marginTop: "1rem"
-                                        }}
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => startEditingAnswer(answer)}
-                                            style={styles.secondaryButton}
-                                        >
-                                            Edit
-                                        </button>
-
-                                        <button type="button"
-                                                onClick={() => handleDeleteAnswer(answer.id)}
-                                                style={styles.secondaryButton}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                );
-            })
+                 <AnswerForm onSubmit={handleCreateAnswer}/>
+             </div>
+        ):(
+            <div style={{...styles.card,
+                        marginBottom: "1.5rem",
+            }}>
+                <h3 style={{marginTop: 0}}>Question solved</h3>
+                <p style={{marginBottom: 0}}>
+                    This question already has an accepted answer. You can no longer add a new answer.
+                </p>
+            </div>
         )}
+        <div style={styles.card}>
+            <h3 style={{marginTop: 0}}>Answers</h3>
+
+            <AnswerList
+                answers={answers}
+                currentUser={currentUser}
+                question={question}
+                onUpdate={handleUpdateAnswer}
+                onDelete={handleDeleteAnswer}
+                onAccept={handleAcceptAnswer}
+                onVoteChanged={loadAnswers}
+            />
         </div>
-        </div>
-        </div>
-    );
+      </div>
+   </div>
+  );
 };
 
 export default QuestionDetailsPage;

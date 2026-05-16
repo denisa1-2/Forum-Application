@@ -29,6 +29,9 @@ public class Answer {
     @Column(nullable = false)
     private LocalDateTime creationDateTime;
 
+    @Column(nullable = false)
+    private boolean accepted = false;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
