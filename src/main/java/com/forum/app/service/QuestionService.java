@@ -1,6 +1,7 @@
 package com.forum.app.service;
 
 import com.forum.app.entity.Question;
+import com.forum.app.entity.Role;
 import com.forum.app.entity.Tag;
 import com.forum.app.entity.User;
 import com.forum.app.repository.QuestionRepository;
@@ -28,6 +29,9 @@ public class QuestionService {
     public Question createQuestion(Long userId,Question question) {
         User author =userRepository.findById(userId).
                 orElseThrow(()-> new RuntimeException("User not found"));
+
+        if(author.getRole() == Role.BANNED)
+            throw new RuntimeException("You account is banned.");
 
         List<Tag> finalTags= tagService.resolveTags(question.getTags());
 

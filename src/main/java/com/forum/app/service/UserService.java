@@ -1,5 +1,6 @@
 package com.forum.app.service;
 
+import com.forum.app.entity.Role;
 import com.forum.app.entity.User;
 import com.forum.app.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,5 +46,26 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public String banUser(Long id) {
+        User user = getUserById(id);
+        user.setRole(Role.BANNED);
+        userRepository.save(user);
+        return "User banned";
+    }
+
+    public String unbanUser(Long id) {
+        User user = getUserById(id);
+        user.setRole(Role.USER);
+        userRepository.save(user);
+        return "User unbanned";
+    }
+
+    public String changeRole(Long id, Role role) {
+        User user = getUserById(id);
+        user.setRole(role);
+        userRepository.save(user);
+        return "User updated";
     }
 }

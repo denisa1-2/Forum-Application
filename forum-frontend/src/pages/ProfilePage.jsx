@@ -35,6 +35,12 @@ const ProfilePage = () => {
                     <p style={styles.infoItem}>
                         <span style={styles.label}>ID:</span> {user.id}
                     </p>
+                    <p style={styles.infoItem}>
+                        <span style={styles.label}>Score:</span> {user.score}
+                    </p>
+                    <p style={styles.infoItem}>
+                        <span style={styles.label}>Role:</span> {user.role}
+                    </p>
                 </div>
 
                 <div style={styles.actions}>
@@ -45,6 +51,12 @@ const ProfilePage = () => {
                     <Link to="/profile/password" style={styles.button}>
                         Change Password
                     </Link>
+
+                    {user.role === "MODERATOR" && (
+                        <Link to="/admin/users" style={styles.button}>
+                            Manage Users
+                        </Link>
+                    )}
 
                     <button
                         onClick={() => navigate("/dashboard")}

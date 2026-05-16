@@ -11,6 +11,7 @@ import QuestionsPage from "./pages/QuestionsPage.jsx";
 import CreateQuestionPage from "./pages/CreateQuestionPage.jsx";
 import EditQuestionPage from "./pages/EditQuestionPage.jsx";
 import QuestionDetailsPage from "./pages/QuestionDetailsPage.jsx";
+import AdminUsersPage from "./pages/AdminUsersPage.jsx";
 
 function App() {
     return (
@@ -70,6 +71,15 @@ function App() {
                 <Route
                     path="/questions/:id"
                     element={<QuestionDetailsPage />}
+                />
+
+                <Route
+                    path="/admin/users"
+                    element={
+                        <ProtectedRoute>
+                            <AdminUsersPage />
+                        </ProtectedRoute>
+                    }
                 />
             </Routes>
         </>

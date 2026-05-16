@@ -32,3 +32,20 @@ export const deleteCurrentUser = async () => {
     const response = await axios.delete(`${API_URL}/me`);
     return response.data;
 };
+
+export const banUser = async (id) => {
+    const response = await axios.put(`${API_URL}/${id}/ban`);
+    return response.data;
+};
+
+export const unbanUser = async (id) => {
+    const response = await axios.put(`${API_URL}/${id}/unban`);
+    return response.data;
+};
+
+export const changeUserRole = async (id, role) => {
+    const response = await axios.put(`${API_URL}/${id}/role`, null, {
+        params: { role },
+    });
+    return response.data;
+};

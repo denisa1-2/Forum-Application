@@ -30,11 +30,24 @@ public class VoteService {
             throw new RuntimeException("You cannot vote your own question");
         }
 
+        if(user.getRole() == Role.BANNED)
+            throw new RuntimeException("You account is banned.");
+
         if (voteRepository.findByUserAndQuestion(user, question).isPresent()) {
             throw new RuntimeException("You already voted this question");
         }
 
         Vote vote = new Vote(voteType, user, question, null);
+
+        User author = question.getAuthor();
+
+        if(voteType == VoteType.UPVOTE)
+            author.setScore(author.getScore() + 2.5);
+        else
+            author.setScore(author.getScore() - 1.5);
+
+        userRepository.save(author);
+
         voteRepository.save(vote);
 
         return getQuestionVoteCount(questionId);
@@ -48,11 +61,28 @@ public class VoteService {
             throw new RuntimeException("You cannot vote your own answer");
         }
 
+        if(user.getRole() == Role.BANNED)
+            throw new RuntimeException("You account is banned.");
+
         if (voteRepository.findByUserAndAnswer(user, answer).isPresent()) {
             throw new RuntimeException("You already voted this answer");
         }
 
         Vote vote = new Vote(voteType, user, null, answer);
+
+        User author = answer.getAuthor();
+
+        if(voteType == VoteType.UPVOTE)
+            author.setScore(author.getScore() + 5);
+        else{
+            author.setScore(author.getScore() - 2.5);
+
+            user.setScore(user.getScore() - 1.5);
+            userRepository.save(user);
+        }
+
+        userRepository.save(author);
+
         voteRepository.save(vote);
 
         return getAnswerVoteCount(answerId);

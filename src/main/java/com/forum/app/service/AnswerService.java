@@ -2,6 +2,7 @@ package com.forum.app.service;
 
 import com.forum.app.entity.Answer;
 import com.forum.app.entity.Question;
+import com.forum.app.entity.Role;
 import com.forum.app.entity.User;
 import com.forum.app.repository.AnswerRepository;
 import com.forum.app.repository.QuestionRepository;
@@ -25,6 +26,9 @@ public class AnswerService {
     public Answer createAnswer(Long userId, Long questionId, Answer answer){
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if(author.getRole() == Role.BANNED)
+            throw new RuntimeException("You account is banned.");
 
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
@@ -110,6 +114,10 @@ public class AnswerService {
 
         answer.setAccepted(true);
         answerRepository.save(answer);
+
+        User answerAuthor = answer.getAuthor();
+        answerAuthor.setScore(answerAuthor.getScore() + 15);
+        userRepository.save(answerAuthor);
 
         question.setStatus("SOLVED");
         questionRepository.save(question);

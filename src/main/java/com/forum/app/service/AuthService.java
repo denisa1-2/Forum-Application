@@ -1,5 +1,6 @@
 package com.forum.app.service;
 
+import com.forum.app.entity.Role;
 import com.forum.app.entity.User;
 import com.forum.app.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +50,9 @@ public class AuthService {
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if(user.getRole() == Role.BANNED)
+            throw new RuntimeException("You account is banned.");
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
