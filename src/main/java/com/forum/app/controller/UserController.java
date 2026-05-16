@@ -1,7 +1,9 @@
 package com.forum.app.controller;
 
+import com.forum.app.entity.Role;
 import com.forum.app.entity.User;
 import com.forum.app.repository.UserRepository;
+import com.forum.app.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,10 +15,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository,  PasswordEncoder passwordEncoder) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder, UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @GetMapping("/me")
@@ -92,5 +96,36 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Password updated successfully");
+    }
+
+    @GetMapping("/{id}/score")
+    public ResponseEntity<?> getUserScore(@PathVariable Long id)
+    {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user.getScore());
+    }
+
+    @PutMapping("/{id}/ban")
+    public ResponseEntity<?> banUser(@PathVariable Long id)
+    {
+        return ResponseEntity.ok(userService.banUser(id));
+    }
+
+    @PutMapping("/{id}/unban")
+    public ResponseEntity<?> unbanUser(@PathVariable Long id){
+        return ResponseEntity.ok(userService.unbanUser(id));
+    }
+
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> changeRole(
+            @PathVariable Long id,
+            @RequestParam Role role
+    ){
+        return ResponseEntity.ok(userService.changeRole(id, role));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

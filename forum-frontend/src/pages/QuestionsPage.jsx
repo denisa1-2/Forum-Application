@@ -10,6 +10,7 @@ const QuestionsPage=() =>{
     const [questions,setQuestions]=useState([]);
     const [loading,setLoading] =useState(true);
     const [currentUser, setCurrentUser] = useState(null);
+    const isBanned = currentUser?.role === "BANNED";
 
     useEffect(()=>{
         //setQuestions(jsonQuestions);
@@ -133,9 +134,15 @@ const QuestionsPage=() =>{
                         </p>
                     </div>
 
-                    <Link to="/questions/create" style={styles.primaryButton}>
-                       Create Question
-                    </Link>
+                    {!isBanned ? (
+                        <Link to="/questions/create" style={styles.primaryButton}>
+                            Create Question
+                        </Link>
+                    ) : (
+                        <p style={{ color: "#8b0000", fontWeight: "bold", margin: 0 }}>
+                            Banned users cannot create questions.
+                        </p>
+                    )}
                 </div>
 
                 <QuestionFilter

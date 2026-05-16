@@ -6,6 +6,7 @@ import { getAllQuestions } from "../services/questionService.js";
 const DashboardPage = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const isBanned = user?.role === "BANNED";
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [recentQuestions, setRecentQuestions] = useState([]);
@@ -96,6 +97,12 @@ const DashboardPage = () => {
                         activity.
                     </p>
                 </section>
+
+                {isBanned && (
+                    <div style={styles.bannedBox}>
+                        Your account has been banned!
+                    </div>
+                )}
 
                 <section style={styles.layout}>
                     <div style={styles.leftColumn}>
@@ -289,6 +296,15 @@ const styles = {
     seeAllLink: {
         textDecoration: "none",
         color: "#5a0c1f",
+        fontWeight: "bold",
+    },
+    bannedBox: {
+        backgroundColor: "#ffe0e0",
+        color: "#8b0000",
+        padding: "1rem",
+        borderRadius: "8px",
+        marginBottom: "1rem",
+        textAlign: "center",
         fontWeight: "bold",
     },
 };

@@ -14,6 +14,7 @@ const QuestionDetailsPage = () => {
 
     const [answers, setAnswers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const isBanned = currentUser?.role === "BANNED";
 
     useEffect(() => {
         loadQuestion();
@@ -50,9 +51,14 @@ const QuestionDetailsPage = () => {
     };
 
     const handleCreateAnswer = async (answerBody) => {
+        if(isBanned) {
+            allert("Banned users cannot add answers.");
+            return;
+        }
         try{
             await createAnswer(id, answerBody);
             await loadAnswers();
+            await loadQuestion();
         }catch(error){
             console.error("Error creating answer", error);
             console.log(error.response);
@@ -117,6 +123,21 @@ const QuestionDetailsPage = () => {
                         Back to all questions
                     </Link>
                 </div>
+
+                {isBanned && (
+                    <div
+                        style={{
+                            ...styles.card,
+                            marginBottom: "1.5rem",
+                            backgroundColor: "#ffe0e0",
+                            color: "#8b0000",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        Your account is banned. You cannot add answers or vote.
+                    </div>
+                )}
+
                 <div style={{ ...styles.card, marginBottom: "1.5rem" }}>
                     <h2 style={{ marginTop: 0 }}>{question.title}</h2>
                  <p>
@@ -138,7 +159,7 @@ const QuestionDetailsPage = () => {
                         </span>
                     </p>
 
-                    <QuestionVoteBox questionId={question.id} />
+                    {!isBanned && <QuestionVoteBox questionId={question.id} />}
 
                 <p>
                     <strong>Date:</strong>{" "}
@@ -169,7 +190,7 @@ const QuestionDetailsPage = () => {
             )}
         </div>
 
-        {question.status !== "SOLVED" ? (
+        {question.status !== "SOLVED" && !isBanned ? (
              <div style={{...styles.card,
                             marginBottom: "1.5rem"
                         }}
@@ -182,9 +203,13 @@ const QuestionDetailsPage = () => {
             <div style={{...styles.card,
                         marginBottom: "1.5rem",
             }}>
-                <h3 style={{marginTop: 0}}>Question solved</h3>
-                <p style={{marginBottom: 0}}>
-                    This question already has an accepted answer. You can no longer add a new answer.
+                <h3 style={{ marginTop: 0 }}>
+                    {isBanned ? "Account banned" : "Question solved"}
+                </h3>
+                <p style={{ marginBottom: 0 }}>
+                    {isBanned
+                        ? "Banned users cannot add answers."
+                        : "This question already has an accepted answer. You can no longer add a new answer."}
                 </p>
             </div>
         )}
@@ -199,6 +224,7 @@ const QuestionDetailsPage = () => {
                 onDelete={handleDeleteAnswer}
                 onAccept={handleAcceptAnswer}
                 onVoteChanged={loadAnswers}
+                isBanned={isBanned}
             />
         </div>
       </div>
