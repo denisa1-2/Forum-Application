@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 const LoginPage = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const darkMode = localStorage.getItem("darkMode") === "true";
 
     const [formData, setFormData] = useState({
         email: "",
@@ -49,7 +48,7 @@ const LoginPage = () => {
         <div
             style={{
                 ...styles.container,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
+                backgroundColor: "#f9ede8",
             }}
         >
             <div style={styles.card}>

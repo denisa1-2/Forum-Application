@@ -6,8 +6,6 @@ const ProfilePage = () => {
 
     const navigate = useNavigate();
 
-    const darkMode = localStorage.getItem("darkMode") === "true";
-
     if (loading) {
         return <p style={{ padding: "1rem" }}>Loading profile...</p>;
     }
@@ -20,7 +18,7 @@ const ProfilePage = () => {
         <div
             style={{
                 ...styles.container,
-                backgroundColor: darkMode ? "#404040" : "#f9ede8",
+                backgroundColor: "#f9ede8",
             }}
         >
             <div style={styles.card}>

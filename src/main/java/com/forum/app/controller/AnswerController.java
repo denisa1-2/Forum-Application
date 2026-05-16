@@ -4,6 +4,7 @@ import com.forum.app.entity.Answer;
 import com.forum.app.service.AnswerService;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,4 +53,18 @@ public class AnswerController {
         answerService.deleteAnswer(userId,answerId);
     }
 
+    @PutMapping("/{answerId}/accept")
+    public ResponseEntity<?> acceptAnswer(@PathVariable Long answerId, HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return  ResponseEntity.status(401).body("User not logged in");
+        }
+
+        try {
+            return ResponseEntity.ok(answerService.acceptAnswer(userId,answerId));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

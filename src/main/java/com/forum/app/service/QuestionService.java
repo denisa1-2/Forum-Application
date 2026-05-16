@@ -27,7 +27,7 @@ public class QuestionService {
 
     public Question createQuestion(Long userId,Question question) {
         User author =userRepository.findById(userId).
-                orElseThrow(()-> new RuntimeException("User not found")); // de mofif de luat user din token
+                orElseThrow(()-> new RuntimeException("User not found"));
 
         List<Tag> finalTags= tagService.resolveTags(question.getTags());
 
@@ -78,7 +78,7 @@ public class QuestionService {
     public Question updateQuestion(Long idUser ,Long idQuestion,Question updatedQuestion) {
         Optional<Question> existingQuestion =questionRepository.findById(idQuestion);
         if(!existingQuestion.isPresent()) {
-            throw new RuntimeException("Can t update this question because it doesn t exist");
+            throw new RuntimeException("Can t update this question because it doesn't exist");
         }
 
         if(!existingQuestion.get().getAuthor().getId().equals(idUser)) {
