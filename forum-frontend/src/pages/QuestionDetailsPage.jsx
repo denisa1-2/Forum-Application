@@ -1,12 +1,12 @@
 import { useEffect, useState} from "react";
-import { Link,useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getQuestionById } from "../services/questionService.js";
-import { createAnswer, deleteAnswer, updateAnswer, getAnswersByQuestion} from "../services/answerService.js";
+import { createAnswer, deleteAnswer, updateAnswer, getAnswersByQuestion, acceptAnswer} from "../services/answerService.js";
 import { getCurrentUser } from "../services/userService.js";
 import { styles } from "../styles/forumTheme.js";
 import AnswerForm from "../components/AnswerForm.jsx";
 import AnswerList from "../components/AnswerList.jsx";
-
+import QuestionVoteBox from "../components/QuestionVoteBox.jsx";
 
 const QuestionDetailsPage = () => {
     const { id } = useParams();
@@ -83,6 +83,30 @@ const QuestionDetailsPage = () => {
         }
     };
 
+    const handleAcceptAnswer = async (answerId) => {
+        const confirmed = window.confirm("Are you sure you want to accept this answer?");
+
+        if(!confirmed)
+            return;
+
+        try{
+            await acceptAnswer(answerId);
+            await loadQuestion();
+            await loadAnswers();
+        }catch(error){
+            console.error("Error accepting answer", error);
+            alert(error.response?.data || "Could not accept answer.");
+        }
+    };
+
+    const getStatusColor = (status) => {
+        if (status === "SOLVED") return "green";
+        if (status === "IN_PROGRESS") return "orange";
+        if (status === "RECEIVED" || status === "CREATED") return "blue";
+        return "gray";
+    };
+
+
     if (!question) return <p style={{ padding: "1rem" }}>Loading...</p>;
 
     return (
@@ -99,9 +123,22 @@ const QuestionDetailsPage = () => {
                      <strong>Author:</strong> {question.author?.username}
                 </p>
 
-                <p>
-                    <strong>Status:</strong> {question.status}
-                </p>
+                    <p>
+                        <strong>Status:</strong>{" "}
+                        <span
+                            style={{
+                                padding: "4px 8px",
+                                borderRadius: "8px",
+                                color: "white",
+                                backgroundColor: getStatusColor(question.status),
+                                fontSize: "12px",
+                                fontWeight: "bold"
+                            }}
+                        >{question.status === "CREATED" ? "RECEIVED" : question.status}
+                        </span>
+                    </p>
+
+                    <QuestionVoteBox questionId={question.id} />
 
                 <p>
                     <strong>Date:</strong>{" "}
@@ -131,28 +168,42 @@ const QuestionDetailsPage = () => {
                 />
             )}
         </div>
-        <div style={{
-            ...styles.card,
-            marginBottom: "1.5rem"
-            }}
-        >
-            <h3 style={{marginTop: 0}}>Add answer</h3>
 
-            <AnswerForm onSubmit={handleCreateAnswer}/>
-        </div>
+        {question.status !== "SOLVED" ? (
+             <div style={{...styles.card,
+                            marginBottom: "1.5rem"
+                        }}
+             >
+                 <h3 style={{marginTop: 0}}>Add answer</h3>
 
+                 <AnswerForm onSubmit={handleCreateAnswer}/>
+             </div>
+        ):(
+            <div style={{...styles.card,
+                        marginBottom: "1.5rem",
+            }}>
+                <h3 style={{marginTop: 0}}>Question solved</h3>
+                <p style={{marginBottom: 0}}>
+                    This question already has an accepted answer. You can no longer add a new answer.
+                </p>
+            </div>
+        )}
         <div style={styles.card}>
-            <h3 style={{ marginTop: 0 }}>Answers</h3>
+            <h3 style={{marginTop: 0}}>Answers</h3>
 
-            <AnswerList answers={answers}
-                        currentUser={currentUser}
-                        onUpdate={handleUpdateAnswer}
-                        onDelete={handleDeleteAnswer}/>
-
+            <AnswerList
+                answers={answers}
+                currentUser={currentUser}
+                question={question}
+                onUpdate={handleUpdateAnswer}
+                onDelete={handleDeleteAnswer}
+                onAccept={handleAcceptAnswer}
+                onVoteChanged={loadAnswers}
+            />
         </div>
-    </div>
-  </div>
-    );
+      </div>
+   </div>
+  );
 };
 
 export default QuestionDetailsPage;

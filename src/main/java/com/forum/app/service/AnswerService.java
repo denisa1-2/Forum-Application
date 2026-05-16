@@ -108,6 +108,9 @@ public class AnswerService {
             throw new RuntimeException("This question is already solved.");
         }
 
+        answer.setAccepted(true);
+        answerRepository.save(answer);
+
         question.setStatus("SOLVED");
         questionRepository.save(question);
 
