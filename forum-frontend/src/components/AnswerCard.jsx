@@ -7,6 +7,8 @@ const AnswerCard = ({ answer, currentUser, question, onUpdate, onDelete, onAccep
     const [isEditing, setIsEditing] = useState(false);
 
     const isAuthor = currentUser && answer.author && currentUser.username === answer.author.username;
+    const isModerator = currentUser?.role === "MODERATOR";
+    const canModify = isAuthor || isModerator;
 
     const isQuestionAuthor = currentUser && question?.author && currentUser.id === question.author.id;
 
@@ -29,10 +31,11 @@ const AnswerCard = ({ answer, currentUser, question, onUpdate, onDelete, onAccep
                 <div style={{marginBottom: "0.75rem",
                             fontWeight: "bold",
                             color: "green",
-                }}>Accepted answer</div>
+                }}>Accepted answer +15</div>
             )}
-            <div style={{ marginBottom: "0.5rem"}}><strong>Author:</strong>
-                {answer.author?.username || "Unknown"}</div>
+            <div style={{ marginBottom: "0.5rem"}}>
+                <strong>Author:</strong>{" "}
+                {answer.author?.username || "Unknown"}. ⭐ {answer.author?.score ?? 0} points</div>
             <div style={{ marginBottom: "0.5rem"}}><strong>Date:</strong>
                 {" "}{answer.creationDateTime ? new Date(answer.creationDateTime).toLocaleString() : "Unknown"}</div>
             {isEditing ? (
@@ -67,10 +70,14 @@ const AnswerCard = ({ answer, currentUser, question, onUpdate, onDelete, onAccep
                             flexWrap: "wrap",
                         }}
                      >
-                    {isAuthor && !isEditing && question?.status !== "SOLVED" && (
+                    {canModify && !isEditing && (question?.status !== "SOLVED" || isModerator) && (
                         <>
-                        <button style={styles.secondaryButton} onClick={() => setIsEditing(true)}>Edit</button>
-                        <button style={styles.secondaryButton} onClick={() => onDelete(answer.id)}>Delete</button>
+                        <button style={styles.secondaryButton}
+                                onClick={() => setIsEditing(true)}>
+                            {isModerator && !isAuthor ? "Edit answer as moderator" : "Edit"}</button>
+                        <button style={styles.secondaryButton}
+                            onClick={() => onDelete(answer.id)}>
+                            {isModerator && !isAuthor ? "Delete answer as moderator" : "Delete"}</button>
                         </>
                     )}
 

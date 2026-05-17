@@ -17,4 +17,5 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
     void deleteByQuestionId(Long questionId);
     void deleteByAnswerQuestionId(Long questionId);
+    void deleteByAnswerId(Long answerId);
 }
