@@ -75,7 +75,7 @@ const QuestionDetailsPage = () => {
             await loadAnswers();
         } catch (error) {
             console.error("Error deleting answer", error);
-            alert("Could not delete answer.");
+            alert(error.response?.data || "Could not delete answer.");
         }
     };
 

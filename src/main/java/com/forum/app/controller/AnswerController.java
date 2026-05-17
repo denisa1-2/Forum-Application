@@ -47,10 +47,20 @@ public class AnswerController {
     }
 
     @DeleteMapping("/{answerId}")
-    public void deleteAnswer(@PathVariable Long answerId,
-                             HttpSession session) {
-        Long userId = getLoggedUserId(session);
-        answerService.deleteAnswer(userId,answerId);
+    public ResponseEntity<?> deleteAnswer(@PathVariable Long answerId,
+                                          HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+
+        try {
+            answerService.deleteAnswer(userId, answerId);
+            return ResponseEntity.ok("Answer deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{answerId}/accept")

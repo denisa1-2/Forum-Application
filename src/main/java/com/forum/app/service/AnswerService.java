@@ -4,11 +4,13 @@ import com.forum.app.entity.Answer;
 import com.forum.app.entity.Question;
 import com.forum.app.entity.Role;
 import com.forum.app.entity.User;
+import com.forum.app.repository.VoteRepository;
 import com.forum.app.repository.AnswerRepository;
 import com.forum.app.repository.QuestionRepository;
 import com.forum.app.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -22,6 +24,7 @@ public class AnswerService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final VoteService voteService;
+    private final VoteRepository voteRepository;
 
     public Answer createAnswer(Long userId, Long questionId, Answer answer){
         User author = userRepository.findById(userId)
@@ -69,11 +72,17 @@ public class AnswerService {
         Answer existingAnswer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new RuntimeException("Answer not found"));
 
-        if(!existingAnswer.getAuthor().getId().equals(userId)){
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("User not found"));
+
+        boolean isAuthor = existingAnswer.getAuthor().getId().equals(userId);
+        boolean isModerator = currentUser.getRole() == Role.MODERATOR;
+
+        if(!isAuthor && !isModerator){
             throw new RuntimeException("User not authorized to update this answer");
         }
 
-        if("SOLVED".equals(existingAnswer.getQuestion().getStatus())){
+        if("SOLVED".equals(existingAnswer.getQuestion().getStatus()) && !isModerator){
             throw new RuntimeException("This question is already solved. Answers can no longer be edited.");
         }
 
@@ -83,18 +92,26 @@ public class AnswerService {
         return answerRepository.save(existingAnswer);
     }
 
+    @Transactional
     public void deleteAnswer(Long userId, Long answerId){
         Answer existingAnswer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new RuntimeException("Answer not found"));
 
-        if(!existingAnswer.getAuthor().getId().equals(userId)){
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAuthor = existingAnswer.getAuthor().getId().equals(userId);
+        boolean isModerator = currentUser.getRole() == Role.MODERATOR;
+
+        if(!isAuthor && !isModerator){
             throw new RuntimeException("User not authorized to delete this answer");
         }
 
-        if("SOLVED".equals(existingAnswer.getQuestion().getStatus())){
+        if("SOLVED".equals(existingAnswer.getQuestion().getStatus()) && !isModerator){
             throw new RuntimeException("This question is already solved. Answers can no longer be deleted.");
         }
 
+        voteRepository.deleteByAnswerId(answerId);
         answerRepository.delete(existingAnswer);
     }
 
