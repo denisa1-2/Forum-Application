@@ -29,7 +29,7 @@ const ChangePasswordPage = () => {
         if (formData.newPassword.length < 6) {
             return "New password must be at least 6 characters";
         }
-        if(passwordRegex.test(formData.newPassword)) {
+        if(!passwordRegex.test(formData.newPassword)) {
             return "Password must contain uppercase, lowercase, number and special character";
         }
         if (formData.newPassword !== formData.confirmPassword) {

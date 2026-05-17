@@ -52,7 +52,7 @@ const QuestionDetailsPage = () => {
 
     const handleCreateAnswer = async (answerBody) => {
         if(isBanned) {
-            allert("Banned users cannot add answers.");
+            alert("Banned users cannot add answers.");
             return;
         }
         try{
@@ -140,9 +140,11 @@ const QuestionDetailsPage = () => {
 
                 <div style={{ ...styles.card, marginBottom: "1.5rem" }}>
                     <h2 style={{ marginTop: 0 }}>{question.title}</h2>
-                 <p>
-                     <strong>Author:</strong> {question.author?.username}
-                </p>
+
+                    <p>
+                        <strong>Author:</strong>{" "}
+                        {question.author?.username || "Unknown"} · ⭐ {question.author?.score ?? 0} points
+                    </p>
 
                     <p>
                         <strong>Status:</strong>{" "}

@@ -7,8 +7,9 @@ import com.forum.app.entity.User;
 import com.forum.app.repository.QuestionRepository;
 import com.forum.app.repository.TagRepository;
 import com.forum.app.repository.UserRepository;
+import com.forum.app.repository.VoteRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,14 @@ public class QuestionService {
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
     private final TagService tagService;
+    private final VoteRepository voteRepository;
 
-    public QuestionService(UserRepository userRepository, QuestionRepository questionRepository, TagRepository tagRepository, TagService tagService) {
+    public QuestionService(UserRepository userRepository, QuestionRepository questionRepository, TagRepository tagRepository, TagService tagService, VoteRepository voteRepository) {
         this.userRepository = userRepository;
         this.questionRepository = questionRepository;
         this.tagService = tagService;
+        this.voteRepository = voteRepository;
+
     }
 
     public Question createQuestion(Long userId,Question question) {
@@ -67,15 +71,23 @@ public class QuestionService {
         return questionRepository.findByAuthorUsernameIgnoreCase(username);
     }
 
+    @Transactional
     public void deleteQuestion(Long idUser ,Long idQuestion) {
         Optional<Question> existingQuestion=questionRepository.findById(idQuestion);
         if(!existingQuestion.isPresent()) {
             throw new RuntimeException("Can t update this question because it doesn t exist");
         }
 
-        if(!existingQuestion.get().getAuthor().getId().equals(idUser)) {
+        Optional<User> currentUser = userRepository.findById(idUser);
+        if(!currentUser.isPresent()) {
+            throw new RuntimeException("User not found");
+        }
+
+        if(!existingQuestion.get().getAuthor().getId().equals(idUser) && (currentUser.get().getRole() != Role.MODERATOR)){
             throw new RuntimeException("User not authorized to delete this question");
         }
+        voteRepository.deleteByAnswerQuestionId(idQuestion);
+        voteRepository.deleteByQuestionId(idQuestion);
         questionRepository.delete(existingQuestion.get());
     }
 
@@ -85,7 +97,12 @@ public class QuestionService {
             throw new RuntimeException("Can t update this question because it doesn't exist");
         }
 
-        if(!existingQuestion.get().getAuthor().getId().equals(idUser)) {
+        Optional<User> currentUser = userRepository.findById(idUser);
+        if(!currentUser.isPresent()) {
+            throw new RuntimeException("User not found");
+        }
+
+        if(!existingQuestion.get().getAuthor().getId().equals(idUser) && (currentUser.get().getRole() != Role.MODERATOR)){
             throw new RuntimeException("User not authorized to update this question");
         }
 

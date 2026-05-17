@@ -7,6 +7,9 @@ const QuestionCard = ({question,onDelete,currentUser}) => {
 
 
     const isAuthor =currentUser && currentUser.id === question.author?.id;
+    const isModerator = currentUser?.role === "MODERATOR";
+    const canModify = isAuthor || isModerator;
+
 
     const getStatusColor = (status) => {
         if (status === "SOLVED") return "green";
@@ -35,7 +38,8 @@ const QuestionCard = ({question,onDelete,currentUser}) => {
             </h3>
 
             <p>
-                <strong>Author:</strong>{question.author?.username || "Unknown"}
+                <strong>Author:</strong>{" "}
+                {question.author?.username || "Unknown"} · ⭐ {question.author?.score ?? 0} points
             </p>
 
             <p>
@@ -75,10 +79,12 @@ const QuestionCard = ({question,onDelete,currentUser}) => {
             </p>
 
 
-            {isAuthor && (
+            {canModify && (
                 <>
                     <Link to={`/questions/edit/${question.id}`}>
-                        <button style={styles.secondaryButton}>Edit</button>
+                        <button style={styles.secondaryButton}>
+                            {isModerator && !isAuthor ? "Edit as moderator":"Edit"}
+                        </button>
                     </Link>
 
                     <button style={styles.secondaryButton}
@@ -87,7 +93,7 @@ const QuestionCard = ({question,onDelete,currentUser}) => {
                             onDelete(question.id);
                         }
                     }}>
-                        Delete
+                        {isModerator && !isAuthor ? "Delete as moderator" : "Delete"}
                     </button>
                 </>
             )}
