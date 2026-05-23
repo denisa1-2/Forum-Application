@@ -5,10 +5,6 @@ const QuestionVoteBox = ({ questionId }) => {
     const [voteCount, setVoteCount] = useState(0);
     const [error, setError] = useState("");
 
-    useEffect(()=> {
-        loadVoteCount();
-    },[questionId]);
-
     const loadVoteCount = async () => {
         try {
             const count = await getQuestionVoteCount(questionId);
@@ -17,6 +13,10 @@ const QuestionVoteBox = ({ questionId }) => {
             console.error("Error loading vote count", error);
         }
     };
+
+    useEffect(()=> {
+        loadVoteCount();
+    },[questionId]);
 
     const handleVote = async (voteType) => {
         try {

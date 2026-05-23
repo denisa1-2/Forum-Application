@@ -16,12 +16,6 @@ const QuestionDetailsPage = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const isBanned = currentUser?.role === "BANNED";
 
-    useEffect(() => {
-        loadQuestion();
-        loadAnswers();
-        loadCurrentUser()
-    }, [id]);
-
     const loadQuestion =async () => {
         try {
             const data=await getQuestionById(id);
@@ -49,6 +43,13 @@ const QuestionDetailsPage = () => {
             setCurrentUser(null);
         }
     };
+
+    useEffect(() => {
+        loadQuestion();
+        loadAnswers();
+        loadCurrentUser()
+    }, [id]);
+
 
     const handleCreateAnswer = async (answerBody) => {
         if(isBanned) {

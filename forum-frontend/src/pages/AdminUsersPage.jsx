@@ -16,12 +16,6 @@ const AdminUsersPage = () => {
 
     const isModerator = user?.role === "MODERATOR";
 
-    useEffect(() => {
-        if (isModerator) {
-            loadUsers();
-        }
-    }, [isModerator]);
-
     const loadUsers = async () => {
         try {
             const data = await getAllUsers();
@@ -30,6 +24,12 @@ const AdminUsersPage = () => {
             setError(err.response?.data || "Could not load users");
         }
     };
+
+    useEffect(() => {
+        if (isModerator) {
+            loadUsers();
+        }
+    }, [isModerator]);
 
     const handleBan = async (id) => {
         try {

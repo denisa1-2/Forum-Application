@@ -12,10 +12,6 @@ const DashboardPage = () => {
     const [recentQuestions, setRecentQuestions] = useState([]);
     const [tags, setTags] = useState([]);
 
-    useEffect(() => {
-        loadRecentQuestions();
-    }, []);
-
     const loadRecentQuestions = async () => {
         try {
             const data = await getAllQuestions();
@@ -40,6 +36,10 @@ const DashboardPage = () => {
             console.error("Error loading recent questions:", error);
         }
     };
+
+    useEffect(() => {
+        loadRecentQuestions();
+    }, []);
 
     const handleLogout = async () => {
         try {

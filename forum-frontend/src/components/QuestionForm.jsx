@@ -14,10 +14,6 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             : ""
     );
 
-    useEffect(() => {
-        loadTags();
-    }, []);
-
     const loadTags =async() => {
         try {
             const data =await getAllTags();
@@ -26,6 +22,10 @@ const QuestionForm =({onSubmit, initialData ={} }) =>
             console.error("Error loading tags", error);
         }
     };
+
+    useEffect(() => {
+        loadTags();
+    }, []);
 
     const handleAddExistingTag = (tagName) => {
         if (!tags.includes(tagName)) {
