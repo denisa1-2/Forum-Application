@@ -1,0 +1,32 @@
+name: Frontend Lint
+
+on:
+  push:
+    branches:
+      - main
+      - denisaradu
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: forum-frontend
+
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: forum-frontend
