@@ -11,10 +11,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public Iterable<User> getAllUsers() {
@@ -52,7 +54,13 @@ public class UserService {
         User user = getUserById(id);
         user.setRole(Role.BANNED);
         userRepository.save(user);
-        return "User banned";
+        try{
+            emailService.sendBanEmail(user.getEmail(), user.getUsername());
+            return "User banned and email sent";
+        }catch(Exception e){
+            System.out.println("Email could not be sent: " + e.getMessage());
+            return "User banned, but email could not be sent";
+        }
     }
 
     public String unbanUser(Long id) {
